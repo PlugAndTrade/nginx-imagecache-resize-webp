@@ -1,0 +1,31 @@
+error_log /dev/stdout info;
+worker_processes  auto;
+events {
+    worker_connections  1024;
+}
+
+http {
+    upstream backend {
+        server ${US};
+    }
+
+    include /etc/nginx/conf.d/*.conf;
+
+    access_log /dev/stdout;
+
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    sendfile    on;
+    tcp_nopush  on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+
+    proxy_temp_path /var/nginx/tmp;
+    proxy_cache_path /tmp/nginx-images-cache/ levels=1:2 keys_zone=static:10m inactive=24h max_size=100m;
+
+    map ${DOLLAR}http_accept ${DOLLAR}webp {
+        default   "";
+        "~*webp"  "webp";
+    }
+}
